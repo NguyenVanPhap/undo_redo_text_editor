@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Mini Text Editor - Undo/Redo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .editor-container {
+            width: 600px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-size: 16px;
+            padding: 10px;
+            resize: vertical;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .buttons {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="editor-container">
+    <textarea id="editor" placeholder="Start typing..."></textarea>
+    <div class="buttons">
+        <button id="undoBtn">Undo</button>
+        <button id="redoBtn">Redo</button>
+    </div>
+</div>
+<script>
+    const undoBtn = document.getElementById("undoBtn");
+    const redoBtn = document.getElementById("redoBtn");
+    const editor = document.getElementById("editor");
+
+    let undoStack = [""];
+    let redoStack = [];
+
+    // Apply a given text value and update current state
+    function applyText(text) {
+        editor.value = text;
+        updateCurrentText();
+    }
+
+    // Update the currentText from editor and push to undoStack
+    function handleInputChange() {
+        const newText = editor.value;
+        if (newText !== undoStack[undoStack.length - 1]) {
+            undoStack.push(newText);
+            redoStack = [];
+        }
+    }
+
+    function updateCurrentText() {
+        // Always keep currentText in sync with editor value
+        currentText = editor.value;
+    }
+
+    // Undo: revert to previous state
+    undoBtn.addEventListener("click", () => {
+        if (undoStack.length > 1) {
+            redoStack.push(undoStack.pop());
+            applyText(undoStack[undoStack.length - 1]);
+        }
+    });
+
+    // Redo: re-apply previously undone state
+    redoBtn.addEventListener("click", () => {
+        if (redoStack.length > 0) {
+            const redoneText = redoStack.pop();
+            undoStack.push(redoneText);
+            applyText(redoneText);
+        }
+    });
+
+    // Listen to user input
+    editor.addEventListener("input", handleInputChange);
+
+    // Initial sync
+    let currentText = editor.value;
+</script>
+</body>
+</html>
